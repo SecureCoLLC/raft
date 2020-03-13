@@ -24,7 +24,7 @@ type inmemPipeline struct {
 
 	shutdown     bool
 	shutdownCh   chan struct{}
-	shutdownLock sync.Mutex
+	shutdownLock sync.RWMutex
 }
 
 type inmemPipelineInflight struct {
@@ -136,6 +136,19 @@ func (i *InmemTransport) InstallSnapshot(id ServerID, target ServerAddress, args
 
 	// Copy the result back
 	out := rpcResp.Response.(*InstallSnapshotResponse)
+	*resp = *out
+	return nil
+}
+
+// TimeoutNow implements the Transport interface.
+func (i *InmemTransport) TimeoutNow(id ServerID, target ServerAddress, args *TimeoutNowRequest, resp *TimeoutNowResponse) error {
+	rpcResp, err := i.makeRPC(target, args, nil, 10*i.timeout)
+	if err != nil {
+		return err
+	}
+
+	// Copy the result back
+	out := rpcResp.Response.(*TimeoutNowResponse)
 	*resp = *out
 	return nil
 }
@@ -306,6 +319,17 @@ func (i *inmemPipeline) AppendEntries(args *AppendEntriesRequest, resp *AppendEn
 		Command:  args,
 		RespChan: respCh,
 	}
+
+	// Check if we have been already shutdown, otherwise the random choose
+	// made by select statement below might pick consumerCh even if
+	// shutdownCh was closed.
+	i.shutdownLock.RLock()
+	shutdown := i.shutdown
+	i.shutdownLock.RUnlock()
+	if shutdown {
+		return nil, ErrPipelineShutdown
+	}
+
 	select {
 	case i.peer.consumerCh <- rpc:
 	case <-timeout:
