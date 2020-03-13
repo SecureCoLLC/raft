@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/peerstreaminc/raft"
+	"github.com/securecollc/raft"
 )
 
 // 5 node cluster where 2 nodes always see a delay in getting a request vote msg.

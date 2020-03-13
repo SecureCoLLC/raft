@@ -2,35 +2,35 @@ package fuzzy
 
 import (
 	"fmt"
-	"log"
+	"github.com/hashicorp/go-hclog"
 	"path/filepath"
 	"time"
 
-	"github.com/peerstream/raft"
+	"github.com/securecollc/raft"
 
-	rdb "github.com/peerstreaminc/raft-boltdb"
+	rdb "github.com/securecollc/raft-boltdb"
 )
 
 type raftNode struct {
 	transport *transport
 	store     *rdb.BoltStore
 	raft      *raft.Raft
-	log       log.Logger
+	log       hclog.Logger
 	fsm       *fuzzyFSM
 	name      string
 	dir       string
 }
 
-func newRaftNode(logger log.Logger, tc *transports, h TransportHooks, nodes []string, name string) (*raftNode, error) {
+func newRaftNode(logger hclog.Logger, tc *transports, h TransportHooks, nodes []string, name string) (*raftNode, error) {
 	var err error
 	var datadir string
 	datadir, err = resolveDirectory(fmt.Sprintf("data/%v", name), true)
 	if err != nil {
 		return nil, err
 	}
-	logger.Printf("[INFO] Creating new raft Node with data in dir %v", datadir)
+	logger.Info("Creating new raft Node with data in dir %v", datadir)
 	var ss *raft.FileSnapshotStore
-	ss, err = raft.NewFileSnapshotStoreWithLogger(datadir, 5, &logger)
+	ss, err = raft.NewFileSnapshotStoreWithLogger(datadir, 5, logger)
 
 	if err != nil {
 		return nil, fmt.Errorf("unable to initialize snapshots %v", err.Error())
@@ -40,7 +40,7 @@ func newRaftNode(logger log.Logger, tc *transports, h TransportHooks, nodes []st
 	config := raft.DefaultConfig()
 	config.SnapshotThreshold = 1409600
 	config.SnapshotInterval = time.Hour
-	config.Logger = &logger
+	config.Logger = logger
 	config.ShutdownOnRemove = false
 	config.LocalID = raft.ServerID(name)
 

@@ -8,7 +8,7 @@ package raftbench
 import (
 	"testing"
 
-	"github.com/peerstreaminc/raft"
+	"github.com/securecollc/raft"
 )
 
 func FirstIndex(b *testing.B, store raft.LogStore) {

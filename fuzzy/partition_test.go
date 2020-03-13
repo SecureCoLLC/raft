@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/peerstreaminc/raft"
+	"github.com/securecollc/raft"
 )
 
 // 5 node cluster where the leader and another node get regularly partitioned off

@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/peerstreaminc/raft"
+	"github.com/securecollc/raft"
 )
 
 type appliedItem struct {
