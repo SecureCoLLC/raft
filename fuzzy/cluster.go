@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/securecollc/raft"
+	"github.com/hashicorp/go-hclog"
 )
 
 type appliedItem struct {
