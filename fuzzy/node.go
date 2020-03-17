@@ -8,7 +8,7 @@ import (
 
 	"github.com/securecollc/raft"
 
-	rdb "github.com/securecollc/raft-boltdb"
+	rdb "github.com/hashicorp/raft-boltdb"
 )
 
 type raftNode struct {
